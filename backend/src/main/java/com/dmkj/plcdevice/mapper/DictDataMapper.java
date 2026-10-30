@@ -1,0 +1,9 @@
+package com.dmkj.plcdevice.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.dmkj.plcdevice.entity.DictData;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface DictDataMapper extends BaseMapper<DictData> {
+}

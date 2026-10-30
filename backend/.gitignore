@@ -1,0 +1,17 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+### Eclipse ###
+.classpath
+.project
+.settings/
+### STS ###
+.springBeans
+### NetBeans ###
+/nbproject/private/
+/build/
+### VS Code ###
+.vscode/

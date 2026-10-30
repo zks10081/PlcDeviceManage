@@ -1,0 +1,34 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: plc-device
+  # 数据源：PostgreSQL（原生驱动；SQL 日志由 MyBatis-Plus 输出）
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/dm-device?useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: postgres
+    password: 123456
+    hikari:                            # HikariCP 连接池配置
+      max-lifetime: 300000             # 连接最大存活时间
+      validation-timeout: 3000         # 连接校验超时时间
+      idle-timeout: 600000             # 连接空闲超时时间
+      connection-test-query: SELECT 1  # 连接健康检查SQL
+  # 应用启动时执行 SQL 建表（已存在则跳过，幂等）
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/schema.sql
+
+mybatis-plus:
+  type-aliases-package: com.dmkj.plcdevice.entity
+  configuration:
+    map-underscore-to-camel-case: true   # 下划线字段自动映射为驼峰属性（如 create_time -> createTime）
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 在控制台打印执行的 SQL（开发用，生产可注释）
+
+jwt:
+  secret: "dmkj-plc-device-secret-key-2024-change-me-please-1234567890"
+  expiration: 86400000

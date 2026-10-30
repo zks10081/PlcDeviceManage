@@ -1,0 +1,28 @@
+# ???? WEB ????
+server:
+  port: 8083
+spring:
+  # ????
+  application:
+    name: plc-device
+# pgsql
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:postgresql://192.168.1.106:5432/freeswitch?useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    #url: jdbc:log4jdbc:postgresql://127.0.0.1:5432/freeswitch?useSSL=false&serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: postgres
+    password: pg123456
+    hikari:                            # HikariCP ?????
+      max-lifetime: 300000             # ????????
+      validation-timeout: 3000         # ????????
+      idle-timeout: 600000             # ????????
+      connection-test-query: SELECT 1  # ??????SQL
+# mybatis-plus ??
+mybatis-plus:
+  mapper-locations: classpath:mappers/*/*.xml,classpath:mappers-api/*/*.xml,classpath:mappers/DmLog.xml
+  type-aliases-package: com.src.modules.*.model,com.src.model.DmLog,com.src.*.*.model
+  # ??????????SQL????????
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # ???????user_name -> userName
+    map-underscore-to-camel-case: true
