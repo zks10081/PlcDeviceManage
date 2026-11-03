@@ -23,6 +23,8 @@ import com.ruoyi.common.core.domain.TreeEntity;
 #elseif($table.tree)
 #set($Entity="TreeEntity")
 #end
+@Data
+@TableName("${ClassName}")
 public class ${ClassName} extends ${Entity}
 {
     private static final long serialVersionUID = 1L;
