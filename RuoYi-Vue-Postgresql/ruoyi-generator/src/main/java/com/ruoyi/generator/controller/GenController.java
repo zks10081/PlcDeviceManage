@@ -113,7 +113,7 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasPermi('tool:gen:import')")
     @Log(title = "代码生成", businessType = BusinessType.IMPORT)
     @PostMapping("/importTable")
-    public AjaxResult importTableSave(@RequestParam("tables") String tables, @RequestParam("tplWebType") String tplWebType)
+    public AjaxResult importTableSave(@RequestParam("tables") String tables, @RequestParam(value ="tplWebType", required = false) String tplWebType)
     {
         String[] tableNames = Convert.toStrArray(tables);
         // 查询表信息
@@ -128,7 +128,7 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasRole('admin')")
     @Log(title = "创建表", businessType = BusinessType.OTHER)
     @PostMapping("/createTable")
-    public AjaxResult createTableSave(@RequestParam("sql") String sql, @RequestParam("tplWebType") String tplWebType)
+    public AjaxResult createTableSave(@RequestParam("sql") String sql, @RequestParam(value ="tplWebType", required = false) String tplWebType)
     {
         try
         {
