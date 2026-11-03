@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.device.mapper.DmDeviceMapper">
+    
+    <resultMap type="DmDevice" id="DmDeviceResult">
+        <result property="id"    column="id"    />
+        <result property="serialNo"    column="serial_no"    />
+        <result property="name"    column="name"    />
+        <result property="ip"    column="ip"    />
+        <result property="port"    column="port"    />
+        <result property="lastOnline"    column="last_online"    />
+        <result property="type"    column="type"    />
+        <result property="subtype"    column="subtype"    />
+        <result property="cameraId"    column="camera_id"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <resultMap id="DmDeviceDmDeviceAttributeResult" type="DmDevice" extends="DmDeviceResult">
+        <collection property="dmDeviceAttributeList" ofType="DmDeviceAttribute" column="id" select="selectDmDeviceAttributeList" />
+    </resultMap>
+
+    <resultMap type="DmDeviceAttribute" id="DmDeviceAttributeResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="controlType"    column="control_type"    />
+        <result property="type"    column="type"    />
+        <result property="address"    column="address"    />
+        <result property="status"    column="status"    />
+        <result property="data"    column="data"    />
+        <result property="plcData"    column="plc_data"    />
+        <result property="collectDate"    column="collect_date"    />
+        <result property="temp1"    column="temp_1"    />
+        <result property="temp2"    column="temp_2"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectDmDeviceVo">
+        select id, serial_no, name, ip, port, last_online, type, subtype, camera_id, remark, create_by, create_time, update_by, update_time from dm_device
+    </sql>
+
+    <select id="selectDmDeviceList" parameterType="DmDevice" resultMap="DmDeviceResult">
+        <include refid="selectDmDeviceVo"/>
+        <where>  
+            <if test="serialNo != null  and serialNo != ''"> and serial_no = #{serialNo}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="ip != null  and ip != ''"> and ip = #{ip}</if>
+            <if test="lastOnline != null "> and last_online = #{lastOnline}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+        </where>
+    </select>
+    
+    <select id="selectDmDeviceById" parameterType="Long" resultMap="DmDeviceDmDeviceAttributeResult">
+        select id, serial_no, name, ip, port, last_online, type, subtype, camera_id, remark, create_by, create_time, update_by, update_time
+        from dm_device
+        where id = #{id}
+    </select>
+
+    <select id="selectDmDeviceAttributeList" resultMap="DmDeviceAttributeResult">
+        select id, name, device_id, control_type, type, address, status, data, plc_data, collect_date, temp_1, temp_2, remark, create_by, create_time, update_by, update_time
+        from dm_device_attribute
+        where device_id = #{device_id}
+    </select>
+
+    <insert id="insertDmDevice" parameterType="DmDevice">
+        insert into dm_device
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="serialNo != null">serial_no,</if>
+            <if test="name != null">name,</if>
+            <if test="ip != null">ip,</if>
+            <if test="port != null">port,</if>
+            <if test="lastOnline != null">last_online,</if>
+            <if test="type != null">type,</if>
+            <if test="subtype != null">subtype,</if>
+            <if test="cameraId != null">camera_id,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="serialNo != null">#{serialNo},</if>
+            <if test="name != null">#{name},</if>
+            <if test="ip != null">#{ip},</if>
+            <if test="port != null">#{port},</if>
+            <if test="lastOnline != null">#{lastOnline},</if>
+            <if test="type != null">#{type},</if>
+            <if test="subtype != null">#{subtype},</if>
+            <if test="cameraId != null">#{cameraId},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDmDevice" parameterType="DmDevice">
+        update dm_device
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="serialNo != null">serial_no = #{serialNo},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="ip != null">ip = #{ip},</if>
+            <if test="port != null">port = #{port},</if>
+            <if test="lastOnline != null">last_online = #{lastOnline},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="subtype != null">subtype = #{subtype},</if>
+            <if test="cameraId != null">camera_id = #{cameraId},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDmDeviceById" parameterType="Long">
+        delete from dm_device where id = #{id}
+    </delete>
+
+    <delete id="deleteDmDeviceByIds" parameterType="String">
+        delete from dm_device where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteDmDeviceAttributeByDeviceIds" parameterType="String">
+        delete from dm_device_attribute where device_id in 
+        <foreach item="deviceId" collection="array" open="(" separator="," close=")">
+            #{deviceId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteDmDeviceAttributeByDeviceId" parameterType="Long">
+        delete from dm_device_attribute where device_id = #{deviceId}
+    </delete>
+
+    <insert id="batchDmDeviceAttribute">
+        insert into dm_device_attribute( id, name, device_id, control_type, type, address, status, data, plc_data, collect_date, temp_1, temp_2, remark, create_by, create_time, update_by, update_time) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.name}, #{item.deviceId}, #{item.controlType}, #{item.type}, #{item.address}, #{item.status}, #{item.data}, #{item.plcData}, #{item.collectDate}, #{item.temp1}, #{item.temp2}, #{item.remark}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime})
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.device.mapper.DmAlarmSnapshootMapper">
+    
+    <resultMap type="DmAlarmSnapshoot" id="DmAlarmSnapshootResult">
+        <result property="id"    column="id"    />
+        <result property="alarmId"    column="alarm_id"    />
+        <result property="alarmName"    column="alarm_name"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="deviceName"    column="device_name"    />
+        <result property="attributeId"    column="attribute_id"    />
+        <result property="attributeName"    column="attribute_name"    />
+        <result property="data"    column="data"    />
+        <result property="collectDate"    column="collect_date"    />
+        <result property="remark"    column="remark"    />
+        <result property="alarmIds"    column="alarm_ids"    />
+        <result property="snapsshootNo"    column="snapsshoot_no"    />
+    </resultMap>
+
+    <sql id="selectDmAlarmSnapshootVo">
+        select id, alarm_id, alarm_name, device_id, device_name, attribute_id, attribute_name, data, collect_date, remark from dm_alarm_snapshoot
+    </sql>
+
+    <select id="selectDmAlarmSnapshootList" parameterType="DmAlarmSnapshoot" resultMap="DmAlarmSnapshootResult">
+        <include refid="selectDmAlarmSnapshootVo"/>
+        <where>  
+            <if test="alarmName != null  and alarmName != ''"> and alarm_name like concat('%', #{alarmName}, '%')</if>
+            <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
+            <if test="attributeName != null  and attributeName != ''"> and attribute_name like concat('%', #{attributeName}, '%')</if>
+            <if test="collectDate != null  and collectDate != ''"> and collect_date = #{collectDate}</if>
+        </where>
+    </select>
+    
+    <select id="selectDmAlarmSnapshootById" parameterType="Long" resultMap="DmAlarmSnapshootResult">
+        <include refid="selectDmAlarmSnapshootVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDmAlarmSnapshoot" parameterType="DmAlarmSnapshoot">
+        insert into dm_alarm_snapshoot
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="alarmId != null">alarm_id,</if>
+            <if test="alarmName != null">alarm_name,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="deviceName != null">device_name,</if>
+            <if test="attributeId != null">attribute_id,</if>
+            <if test="attributeName != null">attribute_name,</if>
+            <if test="data != null">data,</if>
+            <if test="collectDate != null">collect_date,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="alarmId != null">#{alarmId},</if>
+            <if test="alarmName != null">#{alarmName},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="deviceName != null">#{deviceName},</if>
+            <if test="attributeId != null">#{attributeId},</if>
+            <if test="attributeName != null">#{attributeName},</if>
+            <if test="data != null">#{data},</if>
+            <if test="collectDate != null">#{collectDate},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDmAlarmSnapshoot" parameterType="DmAlarmSnapshoot">
+        update dm_alarm_snapshoot
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="alarmId != null">alarm_id = #{alarmId},</if>
+            <if test="alarmName != null">alarm_name = #{alarmName},</if>
+            <if test="deviceId != null">device_id = #{deviceId},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="attributeId != null">attribute_id = #{attributeId},</if>
+            <if test="attributeName != null">attribute_name = #{attributeName},</if>
+            <if test="data != null">data = #{data},</if>
+            <if test="collectDate != null">collect_date = #{collectDate},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDmAlarmSnapshootById" parameterType="Long">
+        delete from dm_alarm_snapshoot where id = #{id}
+    </delete>
+
+    <delete id="deleteDmAlarmSnapshootByIds" parameterType="String">
+        delete from dm_alarm_snapshoot where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
