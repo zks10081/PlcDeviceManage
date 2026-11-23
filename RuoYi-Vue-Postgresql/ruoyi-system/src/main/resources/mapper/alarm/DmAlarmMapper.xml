@@ -5,9 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.ruoyi.device.mapper.DmAlarmMapper">
     
     <resultMap type="DmAlarm" id="DmAlarmResult">
-        <result property="
-id"    column="
-id"    />
+        <result property="id"    column="id"    />
         <result property="title"    column="title"    />
         <result property="type"    column="type"    />
         <result property="level"    column="level"    />
@@ -20,6 +18,8 @@ id"    />
         <result property="attributeData"    column="attribute_data"    />
         <result property="userIds"    column="user_ids"    />
         <result property="userFlag"    column="user_flag"    />
+        <result property="handler"    column="handler"    />
+        <result property="handlerTime"    column="handler_time"    />
         <result property="alarmTime"    column="alarm_time"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
@@ -28,8 +28,7 @@ id"    />
     </resultMap>
 
     <sql id="selectDmAlarmVo">
-        select 
-id, title, type, level, status, content, device_id, device_name, attribute_id, attribute_name, attribute_data, user_ids, user_flag, alarm_time, create_by, create_time, update_by, update_time from dm_alarm
+        select id, title, type, level, status, content, device_id, device_name, attribute_id, attribute_name, attribute_data, user_ids, user_flag, handler, handler_time, alarm_time, create_by, create_time, update_by, update_time from dm_alarm
     </sql>
 
     <select id="selectDmAlarmList" parameterType="DmAlarm" resultMap="DmAlarmResult">
@@ -43,20 +42,15 @@ id, title, type, level, status, content, device_id, device_name, attribute_id, a
         </where>
     </select>
     
-    <select id="selectDmAlarmBy
-id" parameterType="Long" resultMap="DmAlarmResult">
+    <select id="selectDmAlarmByid" parameterType="Long" resultMap="DmAlarmResult">
         <include refid="selectDmAlarmVo"/>
-        where 
-id = #{
-id}
+        where id = #{id}
     </select>
 
     <insert id="insertDmAlarm" parameterType="DmAlarm">
         insert into dm_alarm
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="
-id != null">
-id,</if>
+            <if test="id != null">id,</if>
             <if test="title != null">title,</if>
             <if test="type != null">type,</if>
             <if test="level != null">level,</if>
@@ -69,6 +63,8 @@ id,</if>
             <if test="attributeData != null">attribute_data,</if>
             <if test="userIds != null">user_ids,</if>
             <if test="userFlag != null">user_flag,</if>
+            <if test="handler != null">handler,</if>
+            <if test="handlerTime != null">handler_time,</if>
             <if test="alarmTime != null">alarm_time,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
@@ -76,9 +72,7 @@ id,</if>
             <if test="updateTime != null">update_time,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="
-id != null">#{
-id},</if>
+            <if test="id != null">#{id},</if>
             <if test="title != null">#{title},</if>
             <if test="type != null">#{type},</if>
             <if test="level != null">#{level},</if>
@@ -91,6 +85,8 @@ id},</if>
             <if test="attributeData != null">#{attributeData},</if>
             <if test="userIds != null">#{userIds},</if>
             <if test="userFlag != null">#{userFlag},</if>
+            <if test="handler != null">#{handler},</if>
+            <if test="handlerTime != null">#{handlerTime},</if>
             <if test="alarmTime != null">#{alarmTime},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
@@ -114,32 +110,56 @@ id},</if>
             <if test="attributeData != null">attribute_data = #{attributeData},</if>
             <if test="userIds != null">user_ids = #{userIds},</if>
             <if test="userFlag != null">user_flag = #{userFlag},</if>
+            <if test="handler != null">handler = #{handler},</if>
+            <if test="handlerTime != null">handler_time = #{handlerTime},</if>
             <if test="alarmTime != null">alarm_time = #{alarmTime},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
-        where 
-id = #{
-id}
+        where id = #{id}
     </update>
 
-    <delete id="deleteDmAlarmBy
-id" parameterType="Long">
-        delete from dm_alarm where 
-id = #{
-id}
+    <delete id="deleteDmAlarmByid" parameterType="Long">
+        delete from dm_alarm where id = #{id}
     </delete>
 
-    <delete id="deleteDmAlarmBy
-ids" parameterType="String">
-        delete from dm_alarm where 
-id in 
-        <foreach item="
-id" collection="array" open="(" separator="," close=")">
-            #{
-id}
+    <delete id="deleteDmAlarmByids" parameterType="String">
+        delete from dm_alarm where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
         </foreach>
     </delete>
+
+    <!-- 按时间粒度统计告警数：dateType 取 hour/day/month/year，返回日期格式随粒度变化 -->
+    <select id="alarmCountByDayTrunc" resultType="java.util.HashMap">
+        SELECT
+        TO_CHAR(
+            DATE_TRUNC(#{dateType}::text, alarm_time),
+            CASE #{dateType}::text
+                WHEN 'hour'  THEN 'YYYY-MM-DD HH24'
+                WHEN 'day'   THEN 'YYYY-MM-DD'
+                WHEN 'month' THEN 'YYYY-MM'
+                WHEN 'year'  THEN 'YYYY'
+                ELSE 'YYYY-MM-DD'
+            END
+        ) AS date,
+        COUNT(*) AS count
+        FROM dm_alarm
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                and device_id = #{deviceId}::bigint
+            </if>
+            <if test="startTime != null and startTime != ''">
+                and alarm_time &gt;= #{startTime}::timestamp
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and alarm_time &lt; #{endTime}::timestamp
+            </if>
+        </where>
+        GROUP BY 1
+        ORDER BY 1
+    </select>
+
 </mapper>

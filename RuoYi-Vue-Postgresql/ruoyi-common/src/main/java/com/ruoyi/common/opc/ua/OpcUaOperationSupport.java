@@ -121,6 +121,70 @@ public class OpcUaOperationSupport {
     }
 
     /***
+     * 单个读取 PLC（字符串点位地址重载，与 dispatch 项目保持一致）
+     * @param namespaceIndex 命名空间索引
+     * @param address 点位地址
+     * @return
+     */
+    public String readPLC(int namespaceIndex, String address) {
+        OpcUaClient client = ClientGen.opcUaClient;
+        try {
+            client.connect().get();
+            NodeId nodeId = new NodeId(namespaceIndex, address);
+            CompletableFuture<DataValue> readValue = client.readValue(0.0, TimestampsToReturn.Both, nodeId);
+            DataValue value = readValue.get();
+            if (value.getValue() == null || value.getValue().getValue() == null) {
+                return "";
+            }
+            return value.getValue().getValue().toString();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("", e);
+            return e.getMessage();
+        }
+    }
+
+    /***
+     * 写入 PLC（字符串点位地址重载，与 dispatch 项目保持一致）
+     * @param namespaceIndex 命名空间索引
+     * @param address 点位地址
+     * @param valueType 值类型
+     * @param editValue 写入值
+     * @return
+     */
+    public String writePLC(int namespaceIndex, String address, String valueType, String editValue) {
+        try {
+            OpcUaClient client = ClientGen.opcUaClient;
+            client.connect().get();
+            NodeId nodeId = new NodeId(namespaceIndex, address);
+            Variant v;
+            boolean b = true;
+            switch (editValue) {
+                case "1":
+                    v = new Variant(b);
+                    break;
+                case "0":
+                    b = false;
+                    v = new Variant(b);
+                    break;
+                default:
+                    v = new Variant(editValue);
+                    break;
+            }
+            DataValue dv = new DataValue(v, null, null);
+            StatusCode statusCode = client.writeValue(nodeId, dv).get();
+            if (statusCode.isGood()) {
+                log.info("========== >  it means successfully Wrote '{}' to nodeId={}, statusCodes = {}", v, nodeId, statusCode);
+            } else {
+                log.error("statusCodes: {}", statusCode);
+            }
+            return statusCode.toString();
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("", e);
+            return e.getMessage();
+        }
+    }
+
+    /***
      * 订阅变量
      * @param namespaceIndex
      * @param itemIndex

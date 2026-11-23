@@ -1,65 +1,38 @@
 package com.ruoyi.device.mapper;
 
-import java.util.List;
-
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.device.domain.DmDeviceAttribute;
+import com.ruoyi.device.domain.vo.DmDeviceAttributeQueryCriteria;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
 
 /**
- * 设备点位Mapper接口
- * 
+ * 设备点位 Mapper 接口
+ *
  * @author zmkts
  * @date 2026-11-02
  */
 @Mapper
-public interface DmDeviceAttributeMapper extends BaseMapper<DmDeviceAttribute>
-{
-    /**
-     * 查询设备点位
-     * 
-     * @param id 设备点位主键
-     * @return 设备点位
-     */
-    public DmDeviceAttribute selectDmDeviceAttributeById(Long id);
+public interface DmDeviceAttributeMapper extends BaseMapper<DmDeviceAttribute> {
+
+    IPage<DmDeviceAttribute> findAll(@Param("criteria") DmDeviceAttributeQueryCriteria criteria, Page<Object> page);
+
+    int dmDeviceAttributeAdd(DmDeviceAttribute dmDeviceAttribute);
+
+    int updateDmDeviceAttribute(DmDeviceAttribute dmDeviceAttribute);
+
+    int deleteDmDeviceAttribute(@Param("id") Long id);
+
+    int updatePlcDataByAddress(@Param("address") String address, @Param("plcData") String plcData);
 
     /**
-     * 查询设备点位列表
-     * 
-     * @param dmDeviceAttribute 设备点位
-     * @return 设备点位集合
+     * 按 address 批量更新 plc_data
+     * @param list 每项需包含 address、plcData 两个 key
      */
-    public List<DmDeviceAttribute> selectDmDeviceAttributeList(DmDeviceAttribute dmDeviceAttribute);
-
-    /**
-     * 新增设备点位
-     * 
-     * @param dmDeviceAttribute 设备点位
-     * @return 结果
-     */
-    public int insertDmDeviceAttribute(DmDeviceAttribute dmDeviceAttribute);
-
-    /**
-     * 修改设备点位
-     * 
-     * @param dmDeviceAttribute 设备点位
-     * @return 结果
-     */
-    public int updateDmDeviceAttribute(DmDeviceAttribute dmDeviceAttribute);
-
-    /**
-     * 删除设备点位
-     * 
-     * @param id 设备点位主键
-     * @return 结果
-     */
-    public int deleteDmDeviceAttributeById(Long id);
-
-    /**
-     * 批量删除设备点位
-     * 
-     * @param ids 需要删除的数据主键集合
-     * @return 结果
-     */
-    public int deleteDmDeviceAttributeByIds(Long[] ids);
+    int updateBatchPlcData(@Param("list") List<Map<String, String>> list);
 }

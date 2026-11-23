@@ -100,7 +100,7 @@ public class DmAlarmSnapshootServiceImpl extends ServiceImpl<DmAlarmSnapshootMap
         List<DmAlarmSnapshoot> list = new ArrayList<>();
         for (DmDeviceAttribute attribute : device.getDmDeviceAttributeList()) {
             DmAlarmSnapshoot snapshoot = new DmAlarmSnapshoot();
-            snapshoot.setSnapsshootNo(snapsshootNo);
+            snapshoot.setSnapshootNo(snapsshootNo);
 
             snapshoot.setDeviceId(device.getId());
             snapshoot.setDeviceName(device.getName());
@@ -108,8 +108,8 @@ public class DmAlarmSnapshootServiceImpl extends ServiceImpl<DmAlarmSnapshootMap
             snapshoot.setAttributeId(attribute.getId());
             snapshoot.setAttributeName(attribute.getName());
 
-            snapshoot.setAlarmId(alarm.getid());
-            snapshoot.setAlarmIds(String.valueOf(alarm.getid()));
+            snapshoot.setAlarmId(alarm.getId());
+            snapshoot.setAlarmIds(String.valueOf(alarm.getId()));
             snapshoot.setAlarmName(alarm.getTitle());
 
             snapshoot.setCollectDate(new Date());

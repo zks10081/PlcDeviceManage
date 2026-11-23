@@ -1,9 +1,11 @@
 package com.ruoyi.device.mapper;
 
 import java.util.List;
+import java.util.Map;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.device.domain.DmAlarm;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 告警Mapper接口
@@ -61,4 +63,9 @@ public interface DmAlarmMapper extends BaseMapper<DmAlarm>
      * @return 结果
      */
     public int deleteDmAlarmByids(Long[] ids);
+
+    /**
+     * 按时间粒度统计告警数（hour/day/month/year）
+     */
+    public List<Map<String, Object>> alarmCountByDayTrunc(@Param("dateType") String dateType, @Param("deviceId") String deviceId, @Param("startTime") String startTime, @Param("endTime") String endTime);
 }

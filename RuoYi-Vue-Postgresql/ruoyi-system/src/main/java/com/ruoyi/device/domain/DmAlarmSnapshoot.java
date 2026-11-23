@@ -57,7 +57,7 @@ public class DmAlarmSnapshoot extends BaseEntity
     private String alarmIds;
 
     /** 快照编号 */
-    private String snapsshootNo;
+    private String snapshootNo;
 
 
 }

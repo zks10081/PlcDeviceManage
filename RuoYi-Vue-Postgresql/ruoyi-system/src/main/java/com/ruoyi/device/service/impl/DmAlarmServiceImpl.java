@@ -2,6 +2,7 @@ package com.ruoyi.device.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.ruoyi.common.utils.DateUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.StringUtils;
@@ -116,5 +117,10 @@ public class DmAlarmServiceImpl extends ServiceImpl<DmAlarmMapper, DmAlarm> impl
         alarm.setLevel("0");
         alarm.setStatus("0");
         return alarm;
+    }
+
+    @Override
+    public List<Map<String, Object>> alarmCountByDayTrunc(String dateType, String deviceId, String startTime, String endTime) {
+        return dmAlarmMapper.alarmCountByDayTrunc(dateType, deviceId, startTime, endTime);
     }
 }

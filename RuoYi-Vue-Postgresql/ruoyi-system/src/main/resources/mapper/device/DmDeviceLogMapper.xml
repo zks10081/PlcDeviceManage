@@ -1,100 +1,53 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.ruoyi.device.mapper.DmDeviceLogMapper">
-    
-    <resultMap type="DmDeviceLog" id="DmDeviceLogResult">
-        <result property="id"    column="id"    />
-        <result property="deviceId"    column="device_id"    />
-        <result property="deviceName"    column="device_name"    />
-        <result property="attributeId"    column="attribute_id"    />
-        <result property="attributeName"    column="attribute_name"    />
-        <result property="data"    column="data"    />
-        <result property="collectDate"    column="collect_date"    />
-        <result property="remark"    column="remark"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.device.domain.DmDeviceLog">
+        <id column="id" property="id"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="attribute_id" property="attributeId"/>
+        <result column="attribute_name" property="attributeName"/>
+        <result column="data" property="data"/>
+        <result column="collect_date" property="collectDate"/>
     </resultMap>
 
-    <sql id="selectDmDeviceLogVo">
-        select id, device_id, device_name, attribute_id, attribute_name, data, collect_date, remark, create_by, create_time, update_by, update_time from dm_device_log
-    </sql>
-
-    <select id="selectDmDeviceLogList" parameterType="DmDeviceLog" resultMap="DmDeviceLogResult">
-        <include refid="selectDmDeviceLogVo"/>
-        <where>  
-            <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
-            <if test="attributeName != null  and attributeName != ''"> and attribute_name like concat('%', #{attributeName}, '%')</if>
-            <if test="collectDate != null  and collectDate != ''"> and collect_date = #{collectDate}</if>
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from dm_device_log
+        <where>
+            <if test="criteria.deviceId != null">
+                and  dm_device_log.device_id = #{criteria.deviceId}
+            </if>
+            <if test="criteria.deviceName != null and criteria.deviceName != ''">
+                and  dm_device_log.device_name LIKE CONCAT(#{criteria.deviceName},'%')
+            </if>
+            <if test="criteria.attributeId != null">
+                and  dm_device_log.attribute_id = #{criteria.attributeId}
+            </if>
+            <if test="criteria.attributeName != null and criteria.attributeName != ''">
+                and  dm_device_log.attribute_name LIKE CONCAT(#{criteria.attributeName},'%')
+            </if>
         </where>
-    </select>
-    
-    <select id="selectDmDeviceLogById" parameterType="Long" resultMap="DmDeviceLogResult">
-        <include refid="selectDmDeviceLogVo"/>
-        where id = #{id}
+        order by id DESC
     </select>
 
-    <insert id="insertDmDeviceLog" parameterType="DmDeviceLog">
-        insert into dm_device_log
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">id,</if>
-            <if test="deviceId != null">device_id,</if>
-            <if test="deviceName != null">device_name,</if>
-            <if test="attributeId != null">attribute_id,</if>
-            <if test="attributeName != null">attribute_name,</if>
-            <if test="data != null">data,</if>
-            <if test="collectDate != null">collect_date,</if>
-            <if test="remark != null">remark,</if>
-            <if test="createBy != null">create_by,</if>
-            <if test="createTime != null">create_time,</if>
-            <if test="updateBy != null">update_by,</if>
-            <if test="updateTime != null">update_time,</if>
-         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">#{id},</if>
-            <if test="deviceId != null">#{deviceId},</if>
-            <if test="deviceName != null">#{deviceName},</if>
-            <if test="attributeId != null">#{attributeId},</if>
-            <if test="attributeName != null">#{attributeName},</if>
-            <if test="data != null">#{data},</if>
-            <if test="collectDate != null">#{collectDate},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="createBy != null">#{createBy},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+    <insert id="dmDeviceLogAdd">
+        insert into dm_device_log (device_id, device_name, attribute_id, attribute_name, data, collect_date)
+        values (#{deviceId}, #{deviceName}, #{attributeId}, #{attributeName}, #{data}, #{collectDate})
     </insert>
 
-    <update id="updateDmDeviceLog" parameterType="DmDeviceLog">
-        update dm_device_log
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="deviceId != null">device_id = #{deviceId},</if>
-            <if test="deviceName != null">device_name = #{deviceName},</if>
-            <if test="attributeId != null">attribute_id = #{attributeId},</if>
-            <if test="attributeName != null">attribute_name = #{attributeName},</if>
-            <if test="data != null">data = #{data},</if>
-            <if test="collectDate != null">collect_date = #{collectDate},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="createBy != null">create_by = #{createBy},</if>
-            <if test="createTime != null">create_time = #{createTime},</if>
-            <if test="updateBy != null">update_by = #{updateBy},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-        </trim>
-        where id = #{id}
+    <update id="updateDmDeviceLog">
+        UPDATE dm_device_log SET
+        device_id=#{deviceId}, device_name=#{deviceName}, attribute_id=#{attributeId},
+        attribute_name=#{attributeName}, data=#{data}
+        WHERE id=#{id}
     </update>
 
-    <delete id="deleteDmDeviceLogById" parameterType="Long">
-        delete from dm_device_log where id = #{id}
+    <delete id="deleteDmDeviceLog">
+        DELETE FROM dm_device_log WHERE id = #{id}
     </delete>
 
-    <delete id="deleteDmDeviceLogByIds" parameterType="String">
-        delete from dm_device_log where id in 
-        <foreach item="id" collection="array" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </delete>
 </mapper>

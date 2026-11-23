@@ -1,129 +1,90 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.ruoyi.device.mapper.DmDeviceAttributeMapper">
-    
-    <resultMap type="DmDeviceAttribute" id="DmDeviceAttributeResult">
-        <result property="id"    column="id"    />
-        <result property="name"    column="name"    />
-        <result property="deviceId"    column="device_id"    />
-        <result property="deviceName"    column="device_name"    />
-        <result property="controlType"    column="control_type"    />
-        <result property="type"    column="type"    />
-        <result property="address"    column="address"    />
-        <result property="status"    column="status"    />
-        <result property="data"    column="data"    />
-        <result property="plcData"    column="plc_data"    />
-        <result property="collectDate"    column="collect_date"    />
-        <result property="temp1"    column="temp_1"    />
-        <result property="temp2"    column="temp_2"    />
-        <result property="remark"    column="remark"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.device.domain.DmDeviceAttribute">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="control_type" property="controlType"/>
+        <result column="type" property="type"/>
+        <result column="address" property="address"/>
+        <result column="status" property="status"/>
+        <result column="data" property="data"/>
+        <result column="plc_data" property="plcData"/>
+        <result column="collect_date" property="collectDate"/>
+        <result column="temp1" property="temp1"/>
+        <result column="temp2" property="temp2"/>
     </resultMap>
 
-    <sql id="selectDmDeviceAttributeVo">
-        select id, name, device_id, control_type, type, address, status, data, plc_data, collect_date, temp_1, temp_2, remark, create_by, create_time, update_by, update_time from dm_device_attribute
-    </sql>
-
-    <select id="selectDmDeviceAttributeList" parameterType="DmDeviceAttribute" resultMap="DmDeviceAttributeResult">
-        <include refid="selectDmDeviceAttributeVo"/>
-        <where>  
-            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
-            <if test="deviceId != null "> and device_id = #{deviceId}</if>
-            <if test="controlType != null  and controlType != ''"> and control_type = #{controlType}</if>
-            <if test="type != null  and type != ''"> and type = #{type}</if>
-            <if test="address != null  and address != ''"> and address = #{address}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="data != null  and data != ''"> and data = #{data}</if>
-            <if test="plcData != null  and plcData != ''"> and plc_data = #{plcData}</if>
-            <if test="collectDate != null  and collectDate != ''"> and collect_date = #{collectDate}</if>
-            <if test="temp1 != null  and temp1 != ''"> and temp_1 = #{temp1}</if>
-            <if test="temp2 != null  and temp2 != ''"> and temp_2 = #{temp2}</if>
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from dm_device_attribute
+        <where>
+            <if test="criteria.name != null and criteria.name != ''">
+                and  dm_device_attribute.name LIKE CONCAT(#{criteria.name},'%')
+            </if>
+            <if test="criteria.deviceId != null">
+                and  dm_device_attribute.device_id = #{criteria.deviceId}
+            </if>
+            <if test="criteria.deviceName != null and criteria.deviceName != ''">
+                and  dm_device_attribute.device_name LIKE CONCAT(#{criteria.deviceName},'%')
+            </if>
+            <if test="criteria.type != null and criteria.type != ''">
+                and  dm_device_attribute.type = #{criteria.type}
+            </if>
+            <if test="criteria.status != null and criteria.status != ''">
+                and  dm_device_attribute.status = #{criteria.status}
+            </if>
         </where>
-    </select>
-    
-    <select id="selectDmDeviceAttributeById" parameterType="Long" resultMap="DmDeviceAttributeResult">
-        <include refid="selectDmDeviceAttributeVo"/>
-        where id = #{id}
+        order by id DESC
     </select>
 
-    <insert id="insertDmDeviceAttribute" parameterType="DmDeviceAttribute">
-        insert into dm_device_attribute
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">id,</if>
-            <if test="name != null">name,</if>
-            <if test="deviceId != null">device_id,</if>
-            <if test="controlType != null">control_type,</if>
-            <if test="type != null">type,</if>
-            <if test="address != null">address,</if>
-            <if test="status != null">status,</if>
-            <if test="data != null">data,</if>
-            <if test="plcData != null">plc_data,</if>
-            <if test="collectDate != null">collect_date,</if>
-            <if test="temp1 != null">temp_1,</if>
-            <if test="temp2 != null">temp_2,</if>
-            <if test="remark != null">remark,</if>
-            <if test="createBy != null">create_by,</if>
-            <if test="createTime != null">create_time,</if>
-            <if test="updateBy != null">update_by,</if>
-            <if test="updateTime != null">update_time,</if>
-         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">#{id},</if>
-            <if test="name != null">#{name},</if>
-            <if test="deviceId != null">#{deviceId},</if>
-            <if test="controlType != null">#{controlType},</if>
-            <if test="type != null">#{type},</if>
-            <if test="address != null">#{address},</if>
-            <if test="status != null">#{status},</if>
-            <if test="data != null">#{data},</if>
-            <if test="plcData != null">#{plcData},</if>
-            <if test="collectDate != null">#{collectDate},</if>
-            <if test="temp1 != null">#{temp1},</if>
-            <if test="temp2 != null">#{temp2},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="createBy != null">#{createBy},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+    <insert id="dmDeviceAttributeAdd">
+        insert into dm_device_attribute (name, device_id, device_name, control_type, type,
+        address, status, data, plc_data, collect_date, temp1, temp2)
+        values (#{name}, #{deviceId}, #{deviceName}, #{controlType}, #{type},
+        #{address}, #{status}, #{data}, #{plcData}, #{collectDate}, #{temp1}, #{temp2})
     </insert>
 
-    <update id="updateDmDeviceAttribute" parameterType="DmDeviceAttribute">
-        update dm_device_attribute
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="name != null">name = #{name},</if>
-            <if test="deviceId != null">device_id = #{deviceId},</if>
-            <if test="controlType != null">control_type = #{controlType},</if>
-            <if test="type != null">type = #{type},</if>
-            <if test="address != null">address = #{address},</if>
-            <if test="status != null">status = #{status},</if>
-            <if test="data != null">data = #{data},</if>
-            <if test="plcData != null">plc_data = #{plcData},</if>
-            <if test="collectDate != null">collect_date = #{collectDate},</if>
-            <if test="temp1 != null">temp_1 = #{temp1},</if>
-            <if test="temp2 != null">temp_2 = #{temp2},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="createBy != null">create_by = #{createBy},</if>
-            <if test="createTime != null">create_time = #{createTime},</if>
-            <if test="updateBy != null">update_by = #{updateBy},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-        </trim>
-        where id = #{id}
+    <update id="updateDmDeviceAttribute">
+        UPDATE dm_device_attribute SET
+        name=#{name}, device_id=#{deviceId}, device_name=#{deviceName}, control_type=#{controlType},
+        type=#{type}, address=#{address}, status=#{status}, data=#{data}, plc_data=#{plcData},
+        temp1=#{temp1}, temp2=#{temp2}
+        WHERE id=#{id}
     </update>
 
-    <delete id="deleteDmDeviceAttributeById" parameterType="Long">
-        delete from dm_device_attribute where id = #{id}
+    <delete id="deleteDmDeviceAttribute">
+        DELETE FROM dm_device_attribute WHERE id = #{id}
     </delete>
 
-    <delete id="deleteDmDeviceAttributeByIds" parameterType="String">
-        delete from dm_device_attribute where id in 
-        <foreach item="id" collection="array" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </delete>
+    <update id="updatePlcDataByAddress">
+            UPDATE dm_device_attribute
+            SET plc_data = #{plcData}
+            WHERE address = #{address}
+    </update>
+
+    <!-- 按 address 批量更新 plc_data（PostgreSQL VALUES 关联更新） -->
+    <update id="updateBatchPlcData">
+        <choose>
+            <when test="list != null and list.size() > 0">
+                UPDATE dm_device_attribute AS t
+                SET plc_data = v.plc_data
+                FROM (VALUES
+                <foreach collection="list" item="item" separator=",">
+                    (CAST(#{item.address} AS VARCHAR), CAST(#{item.plcData} AS VARCHAR))
+                </foreach>
+                ) AS v(address, plc_data)
+                WHERE t.address = v.address
+            </when>
+            <otherwise>
+                UPDATE dm_device_attribute SET plc_data = plc_data WHERE 1 = 0
+            </otherwise>
+        </choose>
+    </update>
+
 </mapper>

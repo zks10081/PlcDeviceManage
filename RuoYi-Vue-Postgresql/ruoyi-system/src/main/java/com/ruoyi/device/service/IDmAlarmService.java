@@ -62,4 +62,9 @@ public interface IDmAlarmService extends IService<DmAlarm>
     public int deleteDmAlarmByid(Long id);
 
     public DmAlarm getAlarm(DmDeviceAttribute attribute);
+
+    /**
+     * 按时间粒度统计告警数（hour/day/month/year）
+     */
+    public java.util.List<java.util.Map<String, Object>> alarmCountByDayTrunc(String dateType, String deviceId, String startTime, String endTime);
 }

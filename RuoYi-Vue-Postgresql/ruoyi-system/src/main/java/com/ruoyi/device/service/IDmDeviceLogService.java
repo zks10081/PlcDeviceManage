@@ -1,67 +1,47 @@
 package com.ruoyi.device.service;
 
-import java.util.List;
-
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.device.domain.DmDeviceAttribute;
 import com.ruoyi.device.domain.DmDeviceLog;
+import com.ruoyi.device.domain.vo.DmDeviceLogQueryCriteria;
 
 /**
- * 设备点位日志Service接口
- * 
+ * 设备点位日志 服务类
+ *
  * @author zmkts
  * @date 2026-11-02
  */
-public interface IDmDeviceLogService extends IService<DmDeviceLog>
-{
-    /**
-     * 查询设备点位日志
-     * 
-     * @param id 设备点位日志主键
-     * @return 设备点位日志
-     */
-    public DmDeviceLog selectDmDeviceLogById(Long id);
+public interface IDmDeviceLogService extends IService<DmDeviceLog> {
 
     /**
-     * 查询设备点位日志列表
-     * 
-     * @param dmDeviceLog 设备点位日志
-     * @return 设备点位日志集合
+     * 分页查询设备点位日志列表
+     * @param criteria 查询条件
+     * @param page 分页
      */
-    public List<DmDeviceLog> selectDmDeviceLogList(DmDeviceLog dmDeviceLog);
+    IPage<DmDeviceLog> findAll(DmDeviceLogQueryCriteria criteria, Page<Object> page);
 
     /**
-     * 新增设备点位日志
-     * 
+     * 添加设备点位日志
      * @param dmDeviceLog 设备点位日志
-     * @return 结果
      */
-    public int insertDmDeviceLog(DmDeviceLog dmDeviceLog);
+    int dmDeviceLogAdd(DmDeviceLog dmDeviceLog);
 
     /**
      * 修改设备点位日志
-     * 
      * @param dmDeviceLog 设备点位日志
-     * @return 结果
      */
-    public int updateDmDeviceLog(DmDeviceLog dmDeviceLog);
+    int updateDmDeviceLog(DmDeviceLog dmDeviceLog);
 
     /**
-     * 批量删除设备点位日志
-     * 
-     * @param ids 需要删除的设备点位日志主键集合
-     * @return 结果
+     * 删除设备点位日志
+     * @param id id
      */
-    public int deleteDmDeviceLogByIds(Long[] ids);
+    int deleteDmDeviceLog(Long id);
 
     /**
-     * 删除设备点位日志信息
-     * 
-     * @param id 设备点位日志主键
-     * @return 结果
+     * 根据点位构建日志实体
      */
-    public int deleteDmDeviceLogById(Long id);
-
-
-    public DmDeviceLog getDevicelog(DmDeviceAttribute attribute);
+    DmDeviceLog getDevicelog(DmDeviceAttribute attribute);
 }

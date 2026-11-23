@@ -1,19 +1,18 @@
 package com.ruoyi.quartz.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.ListUtils;
 import com.ruoyi.common.utils.MathUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.device.domain.*;
 import com.ruoyi.device.service.*;
+import com.ruoyi.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -21,8 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component("DeviceTask")
@@ -70,9 +68,9 @@ public class DeviceTask {
     public void attributeDataCalculate(){
         //报警设备初始化
         alarmDeviceMap = new HashMap<>();
-        deviceList = deviceService.selectDmDeviceList(new DmDevice());
+        deviceList = deviceService.list();
         List<DmDeviceAttribute> attributeLists = deviceAttributeService.list(new LambdaQueryWrapper<DmDeviceAttribute>().eq(DmDeviceAttribute::getStatus, "Y"));
-        BigDecimal size = new BigDecimal(attributeLists.size()); size = new BigDecimal(attributeLists.size());
+        BigDecimal size = new BigDecimal(attributeLists.size());
 
         if(MathUtils.gt(size,ThreadMax.multiply(ThreadChannlMin))){
             ThreadChannlMin = size.divide(ThreadMax,0).add(new BigDecimal(10));
@@ -123,13 +121,22 @@ public class DeviceTask {
                     DmDeviceLog devicelog = deviceLogService.getDevicelog(attribute);
                     insertList.add(devicelog);
                 }
+
                 //报警处理
                 if(AlarmType.contains(type)){
                     //得到报警实体
                     DmAlarm alarm = alarmService.getAlarm(attribute);
                     //处理报警
                     /**    向服务器发送报警推送     */
-
+                    AlarmInfo info = new AlarmInfo();
+                    info.setDeviceName("风机");;
+                    info.setAlarmName("风机-故障");
+                    info.setAlarmContent("电扇停转");
+                    info.setDeviceId("2001");
+                    info.setAlarmId(String.valueOf(alarm.getId()));
+                    info.setAlarmDate(DateUtils.dateTime("YYYY-MM-dd HH:mm:ss","2026-11-04 11:10:00"));
+                    info.setNotiferUsers(Stream.of("6001","6002","6003").collect(Collectors.toList()));
+                    HttpUtils.sendAlarm(info);
                     //保存
                     alarmService.save(alarm);
                     //告警快照
@@ -161,9 +168,9 @@ public class DeviceTask {
         }else {
             //一个设备报警多次清空，快照将拼接报警id
             DmDevice device = alarmDeviceMap.get(attribute.getDeviceId());
-            List<DmAlarmSnapshoot> snapshootList = alarmSnapshootService.list(new LambdaQueryWrapper<DmAlarmSnapshoot>().eq(DmAlarmSnapshoot::getSnapsshootNo, device.getSnapsshootNo()));
+            List<DmAlarmSnapshoot> snapshootList = alarmSnapshootService.list(new LambdaQueryWrapper<DmAlarmSnapshoot>().eq(DmAlarmSnapshoot::getSnapshootNo, device.getSnapsshootNo()));
             for (DmAlarmSnapshoot snapshoot : snapshootList) {
-                snapshoot.setAlarmIds(snapshoot.getAlarmIds()+","+alarm.getid());
+                snapshoot.setAlarmIds(snapshoot.getAlarmIds()+","+alarm.getId());
             }
             //更新快照
             alarmSnapshootService.updateBatchById(snapshootList);
