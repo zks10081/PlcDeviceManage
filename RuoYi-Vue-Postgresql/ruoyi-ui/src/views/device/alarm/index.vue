@@ -7,9 +7,9 @@
       <el-form-item label="设备名称" prop="deviceName">
         <el-input v-model="queryParams.deviceName" placeholder="请输入设备名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="告警类型" prop="type">
+      <!-- <el-form-item label="告警类型" prop="type">
         <el-input v-model="queryParams.type" placeholder="请输入告警类型" clearable @keyup.enter.native="handleQuery" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="告警等级" prop="level">
         <el-select v-model="queryParams.level" placeholder="请选择告警等级" clearable filterable>
           <el-option v-for="dict in dict.type.alarm_level" :key="dict.value" :label="dict.label" :value="dict.value" />
@@ -45,24 +45,24 @@
     <el-table v-loading="loading" :data="alarmList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="告警标题" align="center" prop="title" />
-      <el-table-column label="告警类型" align="center" prop="type" />
+      <!-- <el-table-column label="告警类型" align="center" prop="type" /> -->
       <el-table-column label="告警等级" align="center" prop="level">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.alarm_level" :value="scope.row.level" />
         </template>
       </el-table-column>
+      <el-table-column label="告警内容" align="center" prop="content" show-overflow-tooltip />
+      <!-- <el-table-column label="设备ID" align="center" prop="deviceId" /> -->
+      <el-table-column label="设备名称" align="center" prop="deviceName" />
+      <el-table-column label="点位名称" align="center" prop="attributeName" />
+      <el-table-column label="报警点位值" align="center" prop="attributeData" />
       <el-table-column label="处理状态" align="center" prop="status">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.alarm_status" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="告警内容" align="center" prop="content" show-overflow-tooltip />
-      <el-table-column label="设备ID" align="center" prop="deviceId" />
-      <el-table-column label="设备名称" align="center" prop="deviceName" />
-      <el-table-column label="点位名称" align="center" prop="attributeName" />
-      <el-table-column label="报警点位值" align="center" prop="attributeData" />
-      <el-table-column label="通知用户" align="center" prop="userIds" />
-      <el-table-column label="查看状态" align="center" prop="userFlag" />
+      <!-- <el-table-column label="通知用户" align="center" prop="userIds" /> -->
+      <!-- <el-table-column label="查看状态" align="center" prop="userFlag" /> -->
       <el-table-column label="报警时间" align="center" prop="alarmTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.alarmTime) }}</span>
@@ -152,42 +152,69 @@
 
       <el-divider content-position="left">子列表：告警点位快照</el-divider>
       <el-alert v-if="form.id == null" title="请先保存主记录，保存后即可查看该告警关联的点位快照" type="info" :closable="false" show-icon />
-      <div v-else>
-        <div class="sub-toolbar">
-          <span>共 {{ snapTotal }} 条快照（告警ID：{{ form.id }}）</span>
-          <el-button size="mini" icon="el-icon-refresh" @click="loadSnap(snapParams.pageNum)">刷新</el-button>
-        </div>
-        <el-table :data="snapList" v-loading="snapLoading" border stripe size="mini" max-height="260">
-          <el-table-column label="告警ID" align="center" prop="alarmId" />
-          <el-table-column label="告警标题" align="center" prop="alarmName" />
-          <el-table-column label="设备ID" align="center" prop="deviceId" />
-          <el-table-column label="设备名称" align="center" prop="deviceName" />
-          <el-table-column label="点位名称" align="center" prop="attributeName" />
-          <el-table-column label="数据" align="center" prop="data" />
-          <el-table-column label="快照编号" align="center" prop="snapsshootNo" />
-          <el-table-column label="告警ID集合" align="center" prop="alarmIds" />
-          <el-table-column label="采集日期" align="center" prop="collectDate" width="160">
-            <template slot-scope="scope">
-              <span>{{ parseTime(scope.row.collectDate) }}</span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination class="sub-pagination" background small layout="prev, pager, next, total"
-                       :total="snapTotal" :current-page="snapParams.pageNum" :page-size="snapParams.pageSize"
-                       @current-change="loadSnap" />
+      <el-tabs v-else v-model="activeSubTab" @tab-click="handleTabClick">
+        <el-tab-pane label="点位快照" name="attribute">
+          <div class="sub-toolbar">
+            <span>共 {{ snapTotal }} 条快照（告警ID：{{ form.id }}）</span>
+            <el-button size="mini" icon="el-icon-refresh" @click="loadSnap(snapParams.pageNum)">刷新</el-button>
+          </div>
+          <el-table :data="snapList" v-loading="snapLoading" border stripe size="mini" max-height="260">
+            <!-- <el-table-column label="告警ID" align="center" prop="alarmId" /> -->
+            <el-table-column label="告警标题" align="center" prop="alarmName" />
+            <!-- <el-table-column label="设备ID" align="center" prop="deviceId" /> -->
+            <el-table-column label="设备名称" align="center" prop="deviceName" />
+            <el-table-column label="点位名称" align="center" prop="attributeName" />
+            <el-table-column label="数据" align="center" prop="data" />
+            <!-- <el-table-column label="快照编号" align="center" prop="snapshootNo" /> -->
+            <!-- <el-table-column label="告警ID集合" align="center" prop="alarmIds" /> -->
+            <el-table-column label="采集日期" align="center" prop="collectDate" width="160">
+              <template slot-scope="scope">
+                <span>{{ parseTime(scope.row.collectDate) }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-pagination class="sub-pagination" background small layout="prev, pager, next, total"
+                        :total="snapTotal" :current-page="snapParams.pageNum" :page-size="snapParams.pageSize"
+                        @current-change="loadSnap" />
+        
+        </el-tab-pane>
+        <el-tab-pane label="查看情况" name="alarmUser">
+          <div class="sub-toolbar">
+        <span>告警标题：{{ viewAlarmTitle }}（告警ID：{{ viewAlarmId }}）</span>
+        <el-button size="mini" icon="el-icon-refresh" @click="loadViewUsers">刷新</el-button>
       </div>
+      <el-table :data="viewUserList" v-loading="viewLoading" border stripe size="mini" max-height="420">
+        <el-table-column label="用户名称" align="center" prop="username" />
+        <el-table-column label="分区" align="center" prop="partition" />
+        <el-table-column label="查看状态" align="center" prop="temp1">
+          <template slot-scope="scope">
+            <el-tag :type="String(scope.row.temp1) === '1' ? 'success' : 'info'" size="mini">
+              {{ String(scope.row.temp1) === '1' ? '已查看' : '未查看' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="查看时间" align="center" prop="temp2" width="180">
+          <template slot-scope="scope">
+            <span>{{ scope.row.temp2 ? parseTime(scope.row.temp2) : '-' }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+        </el-tab-pane>
+      </el-tabs>
 
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" :loading="saving" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
   </div>
 </template>
 
 <script>
 import { listAlarm, getAlarm, delAlarm, addAlarm, updateAlarm } from "@/api/device/alarm"
 import { listSnapshoot } from "@/api/device/snapshoot"
+import { queryAlarmUser } from "@/api/user/dmUser"
 
 export default {
   name: "Alarm",
@@ -204,6 +231,7 @@ export default {
       title: "",
       open: false,
       saving: false,
+      activeSubTab: "attribute",
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -220,7 +248,12 @@ export default {
       snapParams: { pageNum: 1, pageSize: 5, alarmId: null },
       snapList: [],
       snapTotal: 0,
-      snapLoading: false
+      snapLoading: false,
+      viewOpen: false,
+      viewAlarmId: null,
+      viewAlarmTitle: "",
+      viewUserList: [],
+      viewLoading: false
     }
   },
   created() {
@@ -247,6 +280,7 @@ export default {
       }
       this.snapList = []
       this.snapTotal = 0
+      this.activeSubTab = "attribute"
       this.resetForm("form")
     },
     handleQuery() {
@@ -304,6 +338,10 @@ export default {
     handleExport() {
       this.download('device/alarm/export', { ...this.queryParams }, `alarm_${new Date().getTime()}.xlsx`)
     },
+    handleTabClick(tab) {
+      if (tab.name === "attribute") this.loadAttribute(this.loadSnap.pageNum)
+      if (tab.name === "alarmUser") this.loadSubAlarm(this.loadViewUsers)
+    },
     loadSnap(pageNum) {
       if (this.form.id == null) return
       this.snapParams.pageNum = pageNum || 1
@@ -315,6 +353,23 @@ export default {
         this.snapLoading = false
       }).catch(() => {
         this.snapLoading = false
+      })
+    },
+    handleView(row) {
+      this.viewAlarmId = row.id
+      this.viewAlarmTitle = row.title
+      this.viewUserList = []
+      this.viewOpen = true
+      this.loadViewUsers()
+    },
+    loadViewUsers() {
+      if (this.viewAlarmId == null) return
+      this.viewLoading = true
+      queryAlarmUser(this.viewAlarmId).then(response => {
+        this.viewUserList = response.data || []
+        this.viewLoading = false
+      }).catch(() => {
+        this.viewLoading = false
       })
     }
   }
