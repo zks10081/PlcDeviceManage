@@ -3,17 +3,15 @@ package com.ruoyi.common.opc.ua;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateBuilder;
-import org.slf4j.LoggerFactory;
+import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
+import java.util.regex.Pattern;
 
 /***
  * OPC UA 证书工具类

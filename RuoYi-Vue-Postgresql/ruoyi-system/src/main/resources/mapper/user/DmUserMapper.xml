@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.user.mapper.DmUserMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.user.domain.DmUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="usernum" property="usernum"/>
+        <result column="level" property="level"/>
+        <result column="password" property="password"/>
+        <result column="partition" property="partition"/>
+        <result column="user_state" property="userState"/>
+        <result column="recording" property="recording"/>
+        <result column="camera_ip" property="cameraIp"/>
+        <result column="camera_port" property="cameraPort"/>
+        <result column="camera_account" property="cameraAccount"/>
+        <result column="camera_password" property="cameraPassword"/>
+        <result column="camera_status" property="cameraStatus"/>
+    </resultMap>
+
+    <select id="queryAll" resultMap="BaseResultMap">
+        select * from dm_user
+        <where>
+            <if test="criteria.username != null and criteria.username != ''">
+                and (username LIKE CONCAT(#{criteria.username},'%') or usernum LIKE CONCAT(#{criteria.username},'%'))
+            </if>
+            <if test="criteria.partition != null and criteria.partition != ''">
+                and partition = #{criteria.partition}
+            </if>
+        </where>
+        order by dm_user.usernum ASC
+    </select>
+
+    <select id="dmGroupTransfer" resultType="java.lang.String">
+        select usernum from dm_user where partition = '座机' order by usernum ASC
+    </select>
+
+    <select id="dmGroupTransferPhone" resultType="java.lang.String">
+        select usernum from dm_user where partition = '手机' order by usernum ASC
+    </select>
+
+    <select id="dmGroupTransferBroadcast" resultType="java.lang.String">
+        select usernum from dm_user where partition = '广播' order by usernum ASC
+    </select>
+
+    <select id="dmGroupTransferOuterPhone" resultType="java.lang.String">
+        select usernum from dm_user where partition = '外机' order by usernum ASC
+    </select>
+
+    <select id="listUsers" resultMap="BaseResultMap">
+        select * from dm_user order by usernum ASC
+    </select>
+
+</mapper>

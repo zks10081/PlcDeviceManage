@@ -1,5 +1,7 @@
 package com.ruoyi.common.opc.ua;
 
+import cn.hutool.core.util.StrUtil;
+import com.ruoyi.common.opc.OpcProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
@@ -9,12 +11,12 @@ import org.eclipse.milo.opcua.stack.client.DiscoveryClient;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
-import org.mybatis.logging.Logger;
-import org.mybatis.logging.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,11 +37,15 @@ public class ClientGen {
     private final CompletableFuture<OpcUaClient> future = new CompletableFuture<>();
     public static OpcUaClient opcUaClient;
 
-    private String endpointUrl = "opc.tcp://192.168.1.11:4840";
+    private String endpointUrl;
+    private String username;
+    private String password;
 
-    @PostConstruct
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @EventListener(ApplicationReadyEvent.class)
     public void createClient() {
         try {
+            endpointUrl = StrUtil.format("opc.tcp://{}:{}", OpcProperties.ip,OpcProperties.port);
             Path securityTempDir = Paths.get(System.getProperty("java.io.tmpdir"), "security");
             Files.createDirectories(securityTempDir);
             if (!Files.exists(securityTempDir)) {
@@ -51,8 +57,7 @@ public class ClientGen {
             KeyStoreLoader loader = new KeyStoreLoader().load(securityTempDir);
 
             //安全策略 None、Basic256、Basic128Rsa15、Basic256Sha256
-            SecurityPolicy securityPolicy = SecurityPolicy.None;
-
+            SecurityPolicy securityPolicy = SecurityPolicy.None; //安全策略选择
             List<EndpointDescription> endpoints;
             try {
                 endpoints = DiscoveryClient.getEndpoints(endpointUrl).get();
@@ -85,9 +90,24 @@ public class ClientGen {
                     .setRequestTimeout(uint(5000))
                     .build();
             opcUaClient = OpcUaClient.create(config);
+
+            opcUaClient.connect().get();
+            log.info("OPC UA 客户端注册完成: {}", endpointUrl);
+            future.complete(opcUaClient);
+
         } catch (Exception e) {
-            log.error("创建客户端失败" + e.getMessage());
+            log.error("创建客户端失败", e);
+            // 连接失败也要结束 Future，否则下游订阅会永久等待
+            future.completeExceptionally(e);
         }
+    }
+
+    /**
+     * 客户端注册完成信号：createClient() 中连接成功后 complete。
+     * 下游订阅逻辑基于此 Future 触发，保证订阅一定发生在连接就绪之后。
+     */
+    public CompletableFuture<OpcUaClient> whenReady() {
+        return future;
     }
 
 }

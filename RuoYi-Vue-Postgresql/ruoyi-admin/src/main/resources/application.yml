@@ -100,16 +100,14 @@ token:
 
 #opc服务配置
 opc:
-  #是否开启
-  enable : true;
-  #ip地址
-  ip : 192.168.1.106
-  #账户
-  user : OPCuser
-  #密码
-  password : 123456
-  #密钥
-  code : 7BC0CC8E-482C-47CA-ABDC-0FE7F9C6E729
+  enable: true    #是否开启
+  ip : 192.168.1.102  #ip地址
+  port: 49320 #端口
+  user : OPCUser  #账户
+  password : dm13456  #密码
+  code : 7BC0CC8E-482C-47CA-ABDC-0FE7F9C6E729   #密钥
+  dispatchIp : 192.168.1.106
+  dispatchPort : 8080
 
 
 # MyBatis配置

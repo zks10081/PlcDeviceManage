@@ -1,6 +1,8 @@
 package com.ruoyi.device.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
@@ -19,6 +21,8 @@ public class AlarmInfo {
     //报警内容
     private String alarmContent;
     //报警时间
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date alarmDate;
     //通知用户
     private List<String> notiferUsers;

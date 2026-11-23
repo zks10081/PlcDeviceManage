@@ -1,26 +1,30 @@
 package com.ruoyi.common.opc.ua;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscription;
+import org.eclipse.milo.opcua.sdk.client.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.*;
 import org.eclipse.milo.opcua.stack.core.types.structured.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static com.alibaba.fastjson2.util.TypeUtils.toList;
-import static org.apache.commons.compress.utils.Lists.newArrayList;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
 
 
@@ -48,7 +52,7 @@ public class OpcUaOperationSupport {
      * @param nameIndex
      * @return
      */
-    public String  readPLC(int namespaceIndex, int nameIndex) {
+    public String  readPLC(int namespaceIndex, String nameIndex) {
         OpcUaClient client = ClientGen.opcUaClient;
         try {
             client.connect().get();
@@ -76,109 +80,80 @@ public class OpcUaOperationSupport {
     }
 
     /***
+     * 批量读取 PLC
+     * @param namespaceIndex
+     * @param nodeStrs 点位list
+     * @return
+     */
+    public Map<String,Object> readBatchPLC(int namespaceIndex,List<String> nodeStrs) {
+        OpcUaClient client = ClientGen.opcUaClient;
+        List<NodeId> nodeIdList = new ArrayList<>();
+        Map<String,Object> resultMap = new HashMap<>();
+
+        for (String nodeStr : nodeStrs) {
+            NodeId nodeId = new NodeId(namespaceIndex, nodeStr);
+            nodeIdList.add(nodeId);
+        }
+
+        try {
+            client.connect().get();
+            CompletableFuture<List<DataValue>> listCompletableFuture = client.readValues(0.0, TimestampsToReturn.Both, nodeIdList);
+
+            List<DataValue> dataValues = listCompletableFuture.get();
+            for (int i = 0; i < nodeStrs.size(); i++) {
+                String key = nodeStrs.get(i);
+                DataValue dataValue = dataValues.get(i);
+                String plcValue = dataValue.getValue().getValue().toString();
+                String statusCode = dataValue.getStatusCode().toString();
+                if (dataValue.getStatusCode() != null && !dataValue.getStatusCode().isGood()) {
+                    plcValue = "";
+                    log.error("=====》  点位：{} ，读数据异常，未获取到数据。。。",key);
+                }
+                resultMap.put(key,plcValue);
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("", e);
+        }
+        return resultMap;
+    }
+
+    /***
      * 写入 PLC
      * @param namespaceIndex
      * @param itemIndex
-     * @param valueType
      * @param editValue
      * @return
      */
-    public String  writePLC(int namespaceIndex, int itemIndex, String valueType, String editValue) {
+    public String writePLC(int namespaceIndex, String itemIndex,String dataType,  String editValue) {
         try {
 //          创建连接
             OpcUaClient client = ClientGen.opcUaClient;
             client.connect().get();
 //          创建节点
             NodeId nodeId = new NodeId(namespaceIndex, itemIndex);
-//          创建Variant对象和DataValue对象
-            Variant v;
-            boolean b = true;
-            switch (editValue) {
-                case "1":
-                    v = new Variant(b);
-                    break;
-                case "0":
-                    b = false;
-                    v = new Variant(b);
-                    break;
-                default:
-                    v = new Variant(editValue);
-                    break;
-            }
-            DataValue dv = new DataValue(v, null, null);
+            //获取节点的数据类型
+            UaVariableNode node = client.getAddressSpace().getVariableNode(nodeId);
+            NodeId dataTypeId = node.getDataType();
+
+            //根据数据类型转换 rawValue
+            Object convertedValue = convertValue(editValue, dataTypeId);
+
+            //创建Variant对象和DataValue对象
+            Variant v = new Variant(convertedValue);
+
+            //写入数据
+            DataValue dv = new DataValue(v,  StatusCode.GOOD, null);
             StatusCode statusCode = client.writeValue(nodeId, dv).get();
             if (statusCode.isGood()) {
                 log.info("========== >  it means successfully Wrote '{}' to nodeId={}, statusCodes = {}", v, nodeId, statusCode);
+                return StrUtil.format("successfully Wrote 点位：{}，执行成功",itemIndex);
             } else {
                 log.error("statusCodes: {}", statusCode);
             }
             return statusCode.toString();
 
-        }  catch (InterruptedException | ExecutionException e) {
-            log.error("", e);
-            return e.getMessage();
-        }
-    }
-
-    /***
-     * 单个读取 PLC（字符串点位地址重载，与 dispatch 项目保持一致）
-     * @param namespaceIndex 命名空间索引
-     * @param address 点位地址
-     * @return
-     */
-    public String readPLC(int namespaceIndex, String address) {
-        OpcUaClient client = ClientGen.opcUaClient;
-        try {
-            client.connect().get();
-            NodeId nodeId = new NodeId(namespaceIndex, address);
-            CompletableFuture<DataValue> readValue = client.readValue(0.0, TimestampsToReturn.Both, nodeId);
-            DataValue value = readValue.get();
-            if (value.getValue() == null || value.getValue().getValue() == null) {
-                return "";
-            }
-            return value.getValue().getValue().toString();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("", e);
-            return e.getMessage();
-        }
-    }
-
-    /***
-     * 写入 PLC（字符串点位地址重载，与 dispatch 项目保持一致）
-     * @param namespaceIndex 命名空间索引
-     * @param address 点位地址
-     * @param valueType 值类型
-     * @param editValue 写入值
-     * @return
-     */
-    public String writePLC(int namespaceIndex, String address, String valueType, String editValue) {
-        try {
-            OpcUaClient client = ClientGen.opcUaClient;
-            client.connect().get();
-            NodeId nodeId = new NodeId(namespaceIndex, address);
-            Variant v;
-            boolean b = true;
-            switch (editValue) {
-                case "1":
-                    v = new Variant(b);
-                    break;
-                case "0":
-                    b = false;
-                    v = new Variant(b);
-                    break;
-                default:
-                    v = new Variant(editValue);
-                    break;
-            }
-            DataValue dv = new DataValue(v, null, null);
-            StatusCode statusCode = client.writeValue(nodeId, dv).get();
-            if (statusCode.isGood()) {
-                log.info("========== >  it means successfully Wrote '{}' to nodeId={}, statusCodes = {}", v, nodeId, statusCode);
-            } else {
-                log.error("statusCodes: {}", statusCode);
-            }
-            return statusCode.toString();
-        } catch (InterruptedException | ExecutionException e) {
+        }  catch (InterruptedException | ExecutionException | UaException e) {
             log.error("", e);
             return e.getMessage();
         }
@@ -278,6 +253,53 @@ public class OpcUaOperationSupport {
             log.error("Browsing nodeId={} failed: {}", browseRoot, e.getMessage(), e);
             return e.getMessage();
         }
+    }
+
+    public void getbrowseNode(){
+        OpcUaClient client = ClientGen.opcUaClient;
+        try {
+            client.connect().get();
+            List<ReferenceDescription> browse = client.getAddressSpace().browse(Identifiers.RootFolder);
+            browse.forEach(ref -> {
+                System.out.println("nodeId = " + ref.getNodeId());
+                System.out.println("name = " + ref.getDisplayName().getText());
+            });
+        }catch (InterruptedException | ExecutionException | UaException e) {
+            log.error("Browsing nodeId={} failed: {}", "browseRoot", e.getMessage(), e);
+        }
+    }
+
+    private Object convertValue(Object rawValue, NodeId dataTypeId) {
+        // 使用 Milo 的 Identifiers 类进行类型判断
+        if (Identifiers.UInt16.equals(dataTypeId)) {
+            // 针对 PLC 的 "Word" 或 UInt16 类型
+            return Unsigned.ushort((int) parseToDouble(rawValue));
+        } else if (Identifiers.Int16.equals(dataTypeId)) {
+            return (short) parseToDouble(rawValue);
+        } else if (Identifiers.UInt32.equals(dataTypeId)) {
+            return Unsigned.uint(((Number) rawValue).longValue());
+        } else if (Identifiers.Int32.equals(dataTypeId)) {
+            return (int) parseToDouble(rawValue);
+        } else if (Identifiers.Float.equals(dataTypeId)) {
+            return (float) parseToDouble(rawValue);
+        } else if (Identifiers.Double.equals(dataTypeId)) {
+            return parseToDouble(rawValue);
+        } else if (Identifiers.String.equals(dataTypeId)) {
+            return rawValue.toString();
+        } else if (Identifiers.Boolean.equals(dataTypeId)) {
+            return Boolean.parseBoolean(rawValue.toString());
+        }
+        // ... 添加其他类型的处理
+        return rawValue;
+    }
+
+    private double parseToDouble(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        } else if (value instanceof String) {
+            return Double.parseDouble((String) value);
+        }
+        throw new IllegalArgumentException("不支持的数据类型: " + value.getClass());
     }
 
 }

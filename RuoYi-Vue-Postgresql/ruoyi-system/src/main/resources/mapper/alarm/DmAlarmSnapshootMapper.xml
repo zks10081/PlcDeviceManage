@@ -3,36 +3,45 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.device.mapper.DmAlarmSnapshootMapper">
-    
+
     <resultMap type="DmAlarmSnapshoot" id="DmAlarmSnapshootResult">
-        <result property="id"    column="id"    />
-        <result property="alarmId"    column="alarm_id"    />
-        <result property="alarmName"    column="alarm_name"    />
-        <result property="deviceId"    column="device_id"    />
-        <result property="deviceName"    column="device_name"    />
+        <result property="id"             column="id"              />
+        <result property="alarmId"        column="alarm_id"        />
+        <result property="alarmName"      column="alarm_name"      />
+        <result property="deviceId"       column="device_id"       />
+        <result property="deviceName"     column="device_name"     />
         <result property="attributeId"    column="attribute_id"    />
-        <result property="attributeName"    column="attribute_name"    />
-        <result property="data"    column="data"    />
+        <result property="attributeName"  column="attribute_name"  />
+        <result property="data"           column="data"            />
+        <result property="flag"           column="flag"            />
         <result property="collectDate"    column="collect_date"    />
-        <result property="remark"    column="remark"    />
-        <result property="alarmIds"    column="alarm_ids"    />
-        <result property="snapsshootNo"    column="snapsshoot_no"    />
+        <result property="alarmIds"       column="alarm_ids"       />
+        <!-- 源库字段为 snapshoot_no（不带第二个 s），Java 属性为 snapshootNo -->
+        <result property="snapshootNo"    column="snapshoot_no"    />
+        <result property="remark"         column="remark"          />
     </resultMap>
 
     <sql id="selectDmAlarmSnapshootVo">
-        select id, alarm_id, alarm_name, device_id, device_name, attribute_id, attribute_name, data, collect_date, remark from dm_alarm_snapshoot
+        select id, alarm_id, alarm_name, device_id, device_name, attribute_id, attribute_name,
+               data, flag, collect_date, alarm_ids, snapshoot_no, remark
+        from dm_alarm_snapshoot
     </sql>
 
+    <!-- 查询条件：dispatch findAll 的 alarmId/alarmName/deviceId/deviceName/snapshootNo
+         + 现有 Ruoyi 前端使用的 attributeName/collectDate -->
     <select id="selectDmAlarmSnapshootList" parameterType="DmAlarmSnapshoot" resultMap="DmAlarmSnapshootResult">
         <include refid="selectDmAlarmSnapshootVo"/>
-        <where>  
-            <if test="alarmName != null  and alarmName != ''"> and alarm_name like concat('%', #{alarmName}, '%')</if>
-            <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
-            <if test="attributeName != null  and attributeName != ''"> and attribute_name like concat('%', #{attributeName}, '%')</if>
-            <if test="collectDate != null  and collectDate != ''"> and collect_date = #{collectDate}</if>
+        <where>
+            <if test="alarmId != null"> and alarm_id = #{alarmId}</if>
+            <if test="alarmName != null and alarmName != ''"> and alarm_name like concat(#{alarmName}, '%')</if>
+            <if test="deviceId != null"> and device_id = #{deviceId}</if>
+            <if test="deviceName != null and deviceName != ''"> and device_name like concat(#{deviceName}, '%')</if>
+            <if test="attributeName != null and attributeName != ''"> and attribute_name like concat('%', #{attributeName}, '%')</if>
+            <if test="snapshootNo != null and snapshootNo != ''"> and snapshoot_no like concat(#{snapshootNo}, '%')</if>
+            <if test="collectDate != null"> and collect_date = #{collectDate}</if>
         </where>
     </select>
-    
+
     <select id="selectDmAlarmSnapshootById" parameterType="Long" resultMap="DmAlarmSnapshootResult">
         <include refid="selectDmAlarmSnapshootVo"/>
         where id = #{id}
@@ -49,7 +58,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="attributeId != null">attribute_id,</if>
             <if test="attributeName != null">attribute_name,</if>
             <if test="data != null">data,</if>
+            <if test="flag != null">flag,</if>
             <if test="collectDate != null">collect_date,</if>
+            <if test="alarmIds != null">alarm_ids,</if>
+            <if test="snapshootNo != null">snapshoot_no,</if>
             <if test="remark != null">remark,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -61,7 +73,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="attributeId != null">#{attributeId},</if>
             <if test="attributeName != null">#{attributeName},</if>
             <if test="data != null">#{data},</if>
+            <if test="flag != null">#{flag},</if>
             <if test="collectDate != null">#{collectDate},</if>
+            <if test="alarmIds != null">#{alarmIds},</if>
+            <if test="snapshootNo != null">#{snapshootNo},</if>
             <if test="remark != null">#{remark},</if>
          </trim>
     </insert>
@@ -76,7 +91,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="attributeId != null">attribute_id = #{attributeId},</if>
             <if test="attributeName != null">attribute_name = #{attributeName},</if>
             <if test="data != null">data = #{data},</if>
+            <if test="flag != null">flag = #{flag},</if>
             <if test="collectDate != null">collect_date = #{collectDate},</if>
+            <if test="alarmIds != null">alarm_ids = #{alarmIds},</if>
+            <if test="snapshootNo != null">snapshoot_no = #{snapshootNo},</if>
             <if test="remark != null">remark = #{remark},</if>
         </trim>
         where id = #{id}
@@ -87,7 +105,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteDmAlarmSnapshootByIds" parameterType="String">
-        delete from dm_alarm_snapshoot where id in 
+        delete from dm_alarm_snapshoot where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.device.mapper.DmAlarmTeamMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.device.domain.DmAlarmTeam">
+        <id column="id" property="id"/>
+        <result column="team_name" property="teamName"/>
+        <result column="leader_id" property="leaderId"/>
+        <result column="leader_name" property="leaderName"/>
+        <result column="status" property="status"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <resultMap id="DeviceResultMap" type="com.ruoyi.device.domain.DmDevice">
+        <id column="id" property="id"/>
+        <result column="serial_no" property="serialNo"/>
+        <result column="name" property="name"/>
+        <result column="ip" property="ip"/>
+        <result column="port" property="port"/>
+        <result column="last_online" property="lastOnline"/>
+        <result column="type" property="type"/>
+        <result column="subtype" property="subtype"/>
+        <result column="status" property="status"/>
+        <result column="camera_id" property="cameraId"/>
+    </resultMap>
+
+    <resultMap id="UserResultMap" type="com.ruoyi.user.domain.DmUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="usernum" property="usernum"/>
+        <result column="level" property="level"/>
+        <result column="password" property="password"/>
+        <result column="partition" property="partition"/>
+        <result column="user_type" property="userType"/>
+        <result column="recording" property="recording"/>
+        <result column="camera_ip" property="cameraIp"/>
+        <result column="camera_port" property="cameraPort"/>
+        <result column="camera_account" property="cameraAccount"/>
+        <result column="camera_password" property="cameraPassword"/>
+        <result column="camera_status" property="cameraStatus"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from dm_alarm_team
+        <where>
+            <if test="criteria.teamName != null and criteria.teamName != ''">
+                and dm_alarm_team.team_name LIKE CONCAT(#{criteria.teamName},'%')
+            </if>
+            <if test="criteria.leaderId != null and criteria.leaderId != ''">
+                and dm_alarm_team.leader_id = #{criteria.leaderId}
+            </if>
+            <if test="criteria.leaderName != null and criteria.leaderName != ''">
+                and dm_alarm_team.leader_name LIKE CONCAT(#{criteria.leaderName},'%')
+            </if>
+            <if test="criteria.status != null and criteria.status != ''">
+                and dm_alarm_team.status = #{criteria.status}
+            </if>
+            <if test="criteria.remark != null and criteria.remark != ''">
+                and dm_alarm_team.remark LIKE CONCAT('%', #{criteria.remark}, '%')
+            </if>
+        </where>
+        order by id DESC
+    </select>
+
+    <!-- id 无默认值，由 DmAlarmTeamServiceImpl 生成后传入 -->
+    <insert id="dmAlarmTeamAdd">
+        insert into dm_alarm_team (id, team_name, leader_id, leader_name, status,
+        create_by, create_time, update_by, update_time, remark)
+        values (#{id}, #{teamName}, #{leaderId}, #{leaderName}, #{status},
+        #{createBy}, CURRENT_TIMESTAMP, #{updateBy}, CURRENT_TIMESTAMP, #{remark})
+    </insert>
+
+    <update id="updateDmAlarmTeam">
+        UPDATE dm_alarm_team SET
+        team_name=#{teamName}, leader_id=#{leaderId}, leader_name=#{leaderName},
+        status=#{status}, update_by=#{updateBy}, update_time=CURRENT_TIMESTAMP, remark=#{remark}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteDmAlarmTeam">
+        DELETE FROM dm_alarm_team WHERE id = #{id}
+    </delete>
+
+    <!-- 统一使用 dm_alarm_link：type=device 时 link_id 即设备ID -->
+    <select id="selectDeviceSum" resultType="java.util.HashMap">
+        select
+            d.id,d.name,d.serial_no,d.type,count(l.team_id) link
+        from dm_device d
+        <choose>
+            <when test="teamId != null and teamId != '' and teamId != '-1'">
+                left join dm_alarm_link l on d.id = l.link_id and l.type = 'device' and l.team_id = #{teamId}::bigint
+            </when>
+            <!-- 与 dispatch 保持一致：teamId='-1' 表示没有任何队伍被选中，统计数全部为 0 -->
+            <when test="teamId == '-1'">
+                left join dm_alarm_link l on d.id = l.link_id and l.type = 'device' and 1 = 0
+            </when>
+            <!-- teamId 为空时按源逻辑统计所有关联 -->
+            <otherwise>
+                left join dm_alarm_link l on d.id = l.link_id and l.type = 'device'
+            </otherwise>
+        </choose>
+        GROUP BY d.id, d.name, d.serial_no, d.type
+    </select>
+
+    <select id="selectTeamUserId" resultType="java.lang.String">
+        select link_id from dm_alarm_link where type = 'user'
+        <if test="teamId != null and teamId != '' and teamId != '-1'">
+            and team_id = #{teamId}::bigint
+        </if>
+        <if test="teamId == '-1'">
+            and 1 = 0
+        </if>
+    </select>
+
+    <select id="selectAlarmDeviceByUser" resultMap="DeviceResultMap">
+        select distinct d.* from
+        (select team_id from dm_alarm_link
+        <where>
+            type = 'user'
+            <if test="userId != null and userId != ''">
+                and link_id = #{userId}::bigint
+            </if>
+        </where>
+        ) u left join dm_alarm_link l
+        on u.team_id = l.team_id and l.type = 'device'
+        left join dm_device d
+        on l.link_id = d.id
+    </select>
+
+    <select id="selectAlarmUserByDevice" resultMap="UserResultMap">
+        select distinct u.* from
+        (select team_id from dm_alarm_link
+        <where>
+            type = 'device'
+            <if test="deviceId != null and deviceId != ''">
+                and link_id = #{deviceId}::bigint
+            </if>
+        </where>
+        ) l left join dm_alarm_link link
+        on l.team_id = link.team_id and link.type = 'user'
+        left join dm_user u
+        on link.link_id = u.usernum::bigint
+    </select>
+
+</mapper>

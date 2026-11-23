@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.common.core.domain.DeviceBaseEntity;
 import lombok.Data;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
@@ -19,7 +20,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  */
 @Data
 @TableName("dm_device")
-public class DmDevice extends BaseEntity
+public class DmDevice extends DeviceBaseEntity
 {
     private static final long serialVersionUID = 1L;
 

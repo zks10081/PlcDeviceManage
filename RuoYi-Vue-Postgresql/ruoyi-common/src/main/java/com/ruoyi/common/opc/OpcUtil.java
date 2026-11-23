@@ -1,7 +1,6 @@
 package com.ruoyi.common.opc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.openscada.opc.lib.da.Server;
 
 import java.util.ArrayList;
 import java.util.List;

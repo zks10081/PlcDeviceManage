@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.device.mapper.DmAlarmLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.device.domain.DmAlarmLog">
+        <id column="id" property="id"/>
+        <result column="alarm_id" property="alarmId"/>
+        <result column="user_id" property="userId"/>
+        <result column="flag" property="flag"/>
+        <result column="flag_time" property="flagTime"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <resultMap id="AlarmResultMap" type="com.ruoyi.device.domain.DmAlarm">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="type" property="type"/>
+        <result column="level" property="level"/>
+        <result column="status" property="status"/>
+        <result column="content" property="content"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="attribute_id" property="attributeId"/>
+        <result column="attribute_name" property="attributeName"/>
+        <result column="attribute_data" property="attributeData"/>
+        <result column="user_ids" property="userIds"/>
+        <result column="user_flag" property="userFlag"/>
+        <result column="alarm_time" property="alarmTime"/>
+        <result column="handler" property="handler"/>
+        <result column="handler_time" property="handlerTime"/>
+        <result column="temp1" property="temp1"/>
+        <result column="temp2" property="temp2"/>
+    </resultMap>
+
+    <resultMap id="UserResultMap" type="com.ruoyi.user.domain.DmUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="usernum" property="usernum"/>
+        <result column="level" property="level"/>
+        <result column="password" property="password"/>
+        <result column="partition" property="partition"/>
+        <result column="user_type" property="userType"/>
+        <result column="recording" property="recording"/>
+        <result column="camera_ip" property="cameraIp"/>
+        <result column="camera_port" property="cameraPort"/>
+        <result column="camera_account" property="cameraAccount"/>
+        <result column="camera_password" property="cameraPassword"/>
+        <result column="camera_status" property="cameraStatus"/>
+        <result column="temp1" property="temp1"/>
+        <result column="temp2" property="temp2"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from dm_alarm_log
+        <where>
+            <if test="criteria.alarmId != null">
+                and dm_alarm_log.alarm_id = #{criteria.alarmId}
+            </if>
+            <if test="criteria.userId != null">
+                and dm_alarm_log.user_id = #{criteria.userId}
+            </if>
+            <if test="criteria.flag != null and criteria.flag != ''">
+                and dm_alarm_log.flag = #{criteria.flag}
+            </if>
+            <if test="criteria.createBy != null and criteria.createBy != ''">
+                and dm_alarm_log.create_by LIKE CONCAT(#{criteria.createBy},'%')
+            </if>
+        </where>
+        order by id DESC
+    </select>
+
+    <select id="selectAlarmByUser" resultMap="AlarmResultMap">
+        select a.*,l.flag as temp1,l.flag_time as temp2 from
+            (select * from dm_alarm_log
+                <where>
+                    <if test="userId != null and userId != ''">
+                        and user_id = #{userId}::bigint
+                    </if>
+                </where>
+            ) l left join
+            (
+                select * from dm_alarm
+                <where>
+                    <if test="deviceName != null and deviceName != ''">
+                        and  device_name LIKE CONCAT(#{deviceName},'%')
+                    </if>
+                </where>
+            ) a
+        on l.alarm_id = a.id
+        <where>
+            a.id is not null
+        </where>
+    </select>
+
+    <select id="selectUserByAlarm" resultMap="UserResultMap">
+        select u.*,l.flag as temp1,l.flag_time as temp2 from
+        (select * from dm_alarm_log
+        <where>
+            <if test="alarmId != null and alarmId != ''">
+                and alarm_id = #{alarmId}::bigint
+            </if>
+        </where>
+        ) l left join dm_user u
+        on l.user_id = u.usernum::bigint
+    </select>
+
+    <!-- id 无默认值，由 DmAlarmLogServiceImpl 生成后传入 -->
+    <insert id="dmAlarmLogAdd">
+        insert into dm_alarm_log (id, alarm_id, user_id, flag, flag_time, create_by, create_time)
+        values (#{id}, #{alarmId}, #{userId}, #{flag}, #{flagTime}, #{createBy}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <update id="updateDmAlarmLog">
+        UPDATE dm_alarm_log SET
+        alarm_id=#{alarmId}, user_id=#{userId}, flag=#{flag},
+        flag_time=#{flagTime}, create_by=#{createBy}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteDmAlarmLog">
+        DELETE FROM dm_alarm_log WHERE id = #{id}
+    </delete>
+
+</mapper>

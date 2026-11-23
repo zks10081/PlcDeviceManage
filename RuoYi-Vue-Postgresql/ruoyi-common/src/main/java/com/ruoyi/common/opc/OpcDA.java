@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jinterop.dcom.common.JIException;
 import org.jinterop.dcom.core.JIArray;
 import org.jinterop.dcom.core.JIVariant;
+import org.openscada.opc.lib.common.AlreadyConnectedException;
 import org.openscada.opc.lib.common.ConnectionInformation;
 import org.openscada.opc.lib.common.NotConnectedException;
 import org.openscada.opc.lib.da.*;
@@ -20,17 +21,32 @@ public class OpcDA {
     private Server server;
 
 
-    public Server connect(){
-        //设置OPC配置信息
-        connectionInfo = new ConnectionInformation();
-        connectionInfo.setHost(OpcProperties.ip);
-        connectionInfo.setDomain("");
-        connectionInfo.setUser(OpcProperties.user);
-        connectionInfo.setPassword(OpcProperties.password);
-        connectionInfo.setClsid(OpcProperties.code);
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-        server = new Server(connectionInfo,executor);
+    public Server connect(){
+        try {
+            //设置OPC配置信息
+            connectionInfo = new ConnectionInformation();
+            connectionInfo.setHost(OpcProperties.ip);
+            connectionInfo.setDomain("");
+            connectionInfo.setUser(OpcProperties.user);
+            connectionInfo.setPassword(OpcProperties.password);
+            connectionInfo.setClsid(OpcProperties.code);
+            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+            server = new Server(connectionInfo,executor);
+            server.connect();
+        }
+        catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+        catch (JIException e) {
+            throw new RuntimeException(e);
+        }
+        catch (AlreadyConnectedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            server = null;
+        }
 
         return server;
     }

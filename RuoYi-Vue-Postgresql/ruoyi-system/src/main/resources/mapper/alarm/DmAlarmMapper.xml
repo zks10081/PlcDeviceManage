@@ -34,9 +34,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectDmAlarmList" parameterType="DmAlarm" resultMap="DmAlarmResult">
         <include refid="selectDmAlarmVo"/>
         <where>  
+            <if test="title != null and title != ''"> and title like concat(#{title}, '%')</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
             <if test="level != null  and level != ''"> and level = #{level}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
+            <if test="deviceId != null"> and device_id = #{deviceId}</if>
+            <if test="deviceName != null  and deviceName != ''"> and device_name like concat(#{deviceName}, '%')</if>
             <if test="attributeName != null  and attributeName != ''"> and attribute_name like concat('%', #{attributeName}, '%')</if>
             <if test="alarmTime != null "> and alarm_time = #{alarmTime}</if>
         </where>

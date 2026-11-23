@@ -3,6 +3,8 @@ package com.ruoyi.device.service.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import com.ruoyi.common.utils.DateTimeUtil;
 import com.ruoyi.common.utils.DateUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.StringUtils;
@@ -60,7 +62,7 @@ public class DmAlarmServiceImpl extends ServiceImpl<DmAlarmMapper, DmAlarm> impl
     @Override
     public int insertDmAlarm(DmAlarm dmAlarm)
     {
-        dmAlarm.setCreateTime(DateUtils.getNowDate());
+        dmAlarm.setCreateTime(DateTimeUtil.toDate(new Date()));
         return dmAlarmMapper.insertDmAlarm(dmAlarm);
     }
 
@@ -73,7 +75,7 @@ public class DmAlarmServiceImpl extends ServiceImpl<DmAlarmMapper, DmAlarm> impl
     @Override
     public int updateDmAlarm(DmAlarm dmAlarm)
     {
-        dmAlarm.setUpdateTime(DateUtils.getNowDate());
+        dmAlarm.setUpdateTime(DateTimeUtil.toDate(new Date()));
         return dmAlarmMapper.updateDmAlarm(dmAlarm);
     }
 

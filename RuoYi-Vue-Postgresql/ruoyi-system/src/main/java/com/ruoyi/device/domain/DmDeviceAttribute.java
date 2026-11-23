@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.common.core.domain.DeviceBaseEntity;
 import lombok.Data;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
@@ -18,7 +19,7 @@ import java.util.Date;
  */
 @Data
 @TableName("dm_device_attribute")
-public class DmDeviceAttribute extends BaseEntity
+public class DmDeviceAttribute extends DeviceBaseEntity
 {
     private static final long serialVersionUID = 1L;
 
@@ -64,4 +65,8 @@ public class DmDeviceAttribute extends BaseEntity
 
     /** 临时字段2 */
     private String temp2;
+
+    private String updateBy;
+
+    private String createBy;
 }
