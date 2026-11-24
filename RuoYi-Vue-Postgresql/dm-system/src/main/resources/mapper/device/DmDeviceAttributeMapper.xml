@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dm.device.mapper.DmDeviceAttributeMapper">
+
+    <resultMap id="BaseResultMap" type="com.dm.device.domain.DmDeviceAttribute">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="control_type" property="controlType"/>
+        <result column="type" property="type"/>
+        <result column="address" property="address"/>
+        <result column="status" property="status"/>
+        <result column="data" property="data"/>
+        <result column="plc_data" property="plcData"/>
+        <result column="collect_date" property="collectDate"/>
+        <result column="temp1" property="temp1"/>
+        <result column="temp2" property="temp2"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from dm_device_attribute
+        <where>
+            <if test="criteria.name != null and criteria.name != ''">
+                and  dm_device_attribute.name LIKE CONCAT(#{criteria.name},'%')
+            </if>
+            <if test="criteria.deviceId != null">
+                and  dm_device_attribute.device_id = #{criteria.deviceId}
+            </if>
+            <if test="criteria.deviceName != null and criteria.deviceName != ''">
+                and  dm_device_attribute.device_name LIKE CONCAT(#{criteria.deviceName},'%')
+            </if>
+            <if test="criteria.type != null and criteria.type != ''">
+                and  dm_device_attribute.type = #{criteria.type}
+            </if>
+            <if test="criteria.status != null and criteria.status != ''">
+                and  dm_device_attribute.status = #{criteria.status}
+            </if>
+        </where>
+        order by id DESC
+    </select>
+
+    <insert id="dmDeviceAttributeAdd">
+        insert into dm_device_attribute (name, device_id, device_name, control_type, type,
+        address, status, data, plc_data, collect_date, temp1, temp2)
+        values (#{name}, #{deviceId}, #{deviceName}, #{controlType}, #{type},
+        #{address}, #{status}, #{data}, #{plcData}, #{collectDate}, #{temp1}, #{temp2})
+    </insert>
+
+    <update id="updateDmDeviceAttribute">
+        UPDATE dm_device_attribute SET
+        name=#{name}, device_id=#{deviceId}, device_name=#{deviceName}, control_type=#{controlType},
+        type=#{type}, address=#{address}, status=#{status}, data=#{data}, plc_data=#{plcData},
+        temp1=#{temp1}, temp2=#{temp2}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteDmDeviceAttribute">
+        DELETE FROM dm_device_attribute WHERE id = #{id}
+    </delete>
+
+    <update id="updatePlcDataByAddress">
+            UPDATE dm_device_attribute
+            SET plc_data = #{plcData}
+            WHERE address = #{address}
+    </update>
+
+    <!-- 按 address 批量更新 plc_data（PostgreSQL VALUES 关联更新） -->
+    <update id="updateBatchPlcData">
+        <choose>
+            <when test="list != null and list.size() > 0">
+                UPDATE dm_device_attribute AS t
+                SET plc_data = v.plc_data
+                FROM (VALUES
+                <foreach collection="list" item="item" separator=",">
+                    (CAST(#{item.address} AS VARCHAR), CAST(#{item.plcData} AS VARCHAR))
+                </foreach>
+                ) AS v(address, plc_data)
+                WHERE t.address = v.address
+            </when>
+            <otherwise>
+                UPDATE dm_device_attribute SET plc_data = plc_data WHERE 1 = 0
+            </otherwise>
+        </choose>
+    </update>
+
+</mapper>

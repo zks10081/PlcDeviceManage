@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dm.device.mapper.DmDeviceLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.dm.device.domain.DmDeviceLog">
+        <id column="id" property="id"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="attribute_id" property="attributeId"/>
+        <result column="attribute_name" property="attributeName"/>
+        <result column="data" property="data"/>
+        <result column="collect_date" property="collectDate"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from dm_device_log
+        <where>
+            <if test="criteria.deviceId != null">
+                and  dm_device_log.device_id = #{criteria.deviceId}
+            </if>
+            <if test="criteria.deviceName != null and criteria.deviceName != ''">
+                and  dm_device_log.device_name LIKE CONCAT(#{criteria.deviceName},'%')
+            </if>
+            <if test="criteria.attributeId != null">
+                and  dm_device_log.attribute_id = #{criteria.attributeId}
+            </if>
+            <if test="criteria.attributeName != null and criteria.attributeName != ''">
+                and  dm_device_log.attribute_name LIKE CONCAT(#{criteria.attributeName},'%')
+            </if>
+        </where>
+        order by id DESC
+    </select>
+
+    <insert id="dmDeviceLogAdd">
+        insert into dm_device_log (device_id, device_name, attribute_id, attribute_name, data, collect_date)
+        values (#{deviceId}, #{deviceName}, #{attributeId}, #{attributeName}, #{data}, #{collectDate})
+    </insert>
+
+    <update id="updateDmDeviceLog">
+        UPDATE dm_device_log SET
+        device_id=#{deviceId}, device_name=#{deviceName}, attribute_id=#{attributeId},
+        attribute_name=#{attributeName}, data=#{data}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteDmDeviceLog">
+        DELETE FROM dm_device_log WHERE id = #{id}
+    </delete>
+
+</mapper>

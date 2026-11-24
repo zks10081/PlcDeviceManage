@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dm.device.mapper.DmAlarmLinkMapper">
+
+    <resultMap id="BaseResultMap" type="com.dm.device.domain.DmAlarmLink">
+        <id column="id" property="id"/>
+        <result column="team_id" property="teamId"/>
+        <result column="link_id" property="linkId"/>
+        <result column="type" property="type"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from dm_alarm_link
+        <where>
+            <if test="criteria.teamId != null">
+                and dm_alarm_link.team_id = #{criteria.teamId}
+            </if>
+            <if test="criteria.linkId != null">
+                and dm_alarm_link.link_id = #{criteria.linkId}
+            </if>
+            <if test="criteria.type != null and criteria.type != ''">
+                and dm_alarm_link.type = #{criteria.type}
+            </if>
+        </where>
+        order by id DESC
+    </select>
+
+    <!-- id 无默认值，由 DmAlarmLinkServiceImpl 生成后传入 -->
+    <insert id="dmAlarmLinkAdd">
+        insert into dm_alarm_link (id, team_id, link_id, type)
+        values (#{id}, #{teamId}, #{linkId}, #{type})
+    </insert>
+
+    <update id="updateDmAlarmLink">
+        UPDATE dm_alarm_link SET
+        team_id=#{teamId}, link_id=#{linkId}, type=#{type}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteDmAlarmLink">
+        DELETE FROM dm_alarm_link WHERE id = #{id}
+    </delete>
+
+</mapper>
